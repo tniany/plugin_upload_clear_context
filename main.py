@@ -1,7 +1,6 @@
 from astrbot.api.event import filter, AstrMessageEvent
 from astrbot.api.star import Context, Star, register
 from astrbot.api import logger
-from astrbot.api.message_components import Markdown
 
 @register("clear_context", "Author", "一个用于清除模型上下文的插件", "1.0.0")
 class ClearContextPlugin(Star):
@@ -39,19 +38,9 @@ class ClearContextPlugin(Star):
             if session:
                 context = session.get_context()
                 if context:
-                    # 构建 Markdown 消息
-                    md_content = f"""
-## 当前上下文信息
-
-### 上下文长度
-{len(str(context))} 字符
-
-### 上下文内容
-```
-{str(context)[:500]}...
-```
-                    """
-                    yield event.result([Markdown(md_content)])
+                    # 构建纯文本消息
+                    text_content = f"当前上下文信息\n\n上下文长度: {len(str(context))} 字符\n\n上下文内容:\n{str(context)[:500]}..."
+                    yield event.plain_result(text_content)
                 else:
                     yield event.plain_result("当前无上下文信息")
             else:
@@ -64,18 +53,8 @@ class ClearContextPlugin(Star):
     @filter.command("clear_help")
     async def show_help(self, event: AstrMessageEvent):
         """显示插件帮助信息"""
-        md_content = f"""
-## 清除上下文插件帮助
-
-### 指令列表
-- `/clear` - 清除当前模型上下文
-- `/context` - 查看当前上下文信息
-- `/clear_help` - 显示此帮助信息
-
-### 功能说明
-此插件用于管理模型上下文，可帮助解决上下文过长导致的问题，提高模型响应质量。
-        """
-        yield event.result([Markdown(md_content)])
+        text_content = f"清除上下文插件帮助\n\n指令列表:\n- /clear - 清除当前模型上下文\n- /context - 查看当前上下文信息\n- /clear_help - 显示此帮助信息\n\n功能说明:\n此插件用于管理模型上下文，可帮助解决上下文过长导致的问题，提高模型响应质量。"
+        yield event.plain_result(text_content)
 
     async def terminate(self):
         """插件销毁方法"""
